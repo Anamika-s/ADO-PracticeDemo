@@ -1,0 +1,14 @@
+﻿create database ProjectDb
+use ProjectDb
+
+create table Employee (id int identity primary key,
+name varchar(20) not null,
+dept varchar(20) check (dept In ('HR', 'Accts', 'IT','Sales')),
+salary int check (salary between 20000 AND 50000),
+doj date not null check (doj >= GetDate()))
+
+select * from Employee
+
+-- We will perform CRUD operations from Console Application
+-- using ADO.Net
+
