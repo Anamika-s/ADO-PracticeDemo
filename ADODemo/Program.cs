@@ -62,10 +62,19 @@ namespace ADODemo
             }
             
         }
+        static string GetConnectionString()
+        {
+            return @"data source=ANAMIKA\SQLSERVER;initial catalog=ProjectDb;integrated security=true";
+        }
+        static SqlConnection GetConnection()
+        {
+            return new SqlConnection(GetConnectionString());
+        }
 
         static void GetEmployees()
         {
-            SqlConnection connection = new SqlConnection(@"data source=ANAMIKA\SQLSERVER;initial catalog=ProjectDb;integrated security=true");
+            //SqlConnection connection = new SqlConnection(@"data source=ANAMIKA\SQLSERVER;initial catalog=ProjectDb;integrated security=true");
+            SqlConnection connection = GetConnection();
             SqlCommand command = new SqlCommand("select * from Employee", connection);
             connection.Open();
             SqlDataReader reader = command.ExecuteReader();
@@ -83,10 +92,13 @@ namespace ADODemo
             }
 
             connection.Close();
+            command.Dispose();
+            connection.Dispose();
         }
         static void InsertEmployeeRecord(string name , string dept, int salary, DateTime doj)
         {
-            SqlConnection connection = new SqlConnection(@"data source=ANAMIKA\SQLSERVER;initial catalog=ProjectDb;integrated security=true");
+            //SqlConnection connection = new SqlConnection(@"data source=ANAMIKA\SQLSERVER;initial catalog=ProjectDb;integrated security=true");
+            SqlConnection connection = GetConnection();
             SqlCommand command = new SqlCommand();
             command.CommandText = "insert into Employee(name, dept, salary, doj) values(@name, @dept,@salary,@doj)";
             command.Parameters.AddWithValue("@name", name);
@@ -97,60 +109,81 @@ namespace ADODemo
             connection.Open();
             command.ExecuteNonQuery();
             connection.Close();
+            command.Dispose();
+            connection.Dispose();
 
         }
 
 
         static void UpdateEmployee(int id, string dept, int salary)
         {
-            SqlConnection connection = new SqlConnection(@"data source=ANAMIKA\SQLSERVER;initial catalog=ProjectDb;integrated security=true");
-            SqlCommand command = new SqlCommand();
-            command.CommandText = "update employee set dept = @dept, salary = @salary where id=@id";
-            command.Connection = connection;
-            command.Parameters.AddWithValue("@dept", dept);
-            command.Parameters.AddWithValue("@salary", salary);
-            command.Parameters.AddWithValue("@id", id);
-            connection.Open();
-            command.ExecuteNonQuery();
-            connection.Close();
+            //SqlConnection connection = new SqlConnection(@"data source=ANAMIKA\SQLSERVER;initial catalog=ProjectDb;integrated security=true");
+            using (SqlConnection connection = GetConnection())
+            {
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.CommandText = "update employee set dept = @dept, salary = @salary where id=@id";
+                    command.Connection = connection;
+                    command.Parameters.AddWithValue("@dept", dept);
+                    command.Parameters.AddWithValue("@salary", salary);
+                    command.Parameters.AddWithValue("@id", id);
+                    connection.Open();
+                    command.ExecuteNonQuery();
+                    connection.Close();
+                }
+            }
         }
 
         static void DeleteEmployee(int id)
         {
-            SqlConnection connection = new SqlConnection(@"data source=ANAMIKA\SQLSERVER;initial catalog=ProjectDb;integrated security=true");
-            SqlCommand command = new SqlCommand();
-            command.CommandText = "delete employee where id=@id";
-            command.Parameters.AddWithValue("@id", id);
-            command.Connection = connection;
-            connection.Open();
-            command.ExecuteNonQuery();
-            connection.Close();
+            //SqlConnection connection = new SqlConnection(@"data source=ANAMIKA\SQLSERVER;initial catalog=ProjectDb;integrated security=true");
+            using (SqlConnection connection = GetConnection())
+            {
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.CommandText = "delete employee where id=@id";
+                    command.Parameters.AddWithValue("@id", id);
+                    command.Connection = connection;
+                    connection.Open();
+                    command.ExecuteNonQuery();
+                    connection.Close();
+                }
+            }
         }
         static void SearchEmployeeByID(int id)
         {
-            SqlConnection connection = new SqlConnection(@"data source=ANAMIKA\SQLSERVER;initial catalog=ProjectDb;integrated security=true");
-            SqlCommand command = new SqlCommand("select * from Employee where id=@id", connection);
-            command.Parameters.AddWithValue("@id", id);
-            connection.Open();
-            SqlDataReader reader = command.ExecuteReader();
-            if (reader.HasRows)
+            //SqlConnection connection = new SqlConnection(@"data source=ANAMIKA\SQLSERVER;initial catalog=ProjectDb;integrated security=true");
+            using (SqlConnection connection = GetConnection())
             {
-                reader.Read();
-                Console.WriteLine(reader[0] + " " + reader[1] + " " + reader[2] + reader[3]);
+                using (SqlCommand command = new SqlCommand("select * from Employee where id=@id", connection))
+                {
+                    command.Parameters.AddWithValue("@id", id);
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        reader.Read();
+                        Console.WriteLine(reader[0] + " " + reader[1] + " " + reader[2] + reader[3]);
+                    }
+                    else
+                    {
+                        Console.WriteLine("There is no record with this ID");
+                    }
+                    connection.Close();
+                }
             }
-            else
-            {
-                Console.WriteLine("There is no record with this ID");
             }
-            connection.Close();
-        }
         static int GetEmployeesCount()
         {
-            SqlConnection connection = new SqlConnection(@"data source=ANAMIKA\SQLSERVER;initial catalog=ProjectDb;integrated security=true");
+            //SqlConnection connection = new SqlConnection(@"data source=ANAMIKA\SQLSERVER;initial catalog=ProjectDb;integrated security=true");
+            SqlConnection connection = GetConnection();
             SqlCommand command = new SqlCommand("select count(*) from Employee", connection);
             command.Connection = connection;
             connection.Open();
             int count = (int)command.ExecuteScalar();
+            connection.Close();
+            command.Dispose();
+            connection.Dispose();
             return count;
 
         }
